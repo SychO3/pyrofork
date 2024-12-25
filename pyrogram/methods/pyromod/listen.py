@@ -38,7 +38,7 @@ class Listen:
         user_id: Union[Union[int, str], List[Union[int, str]]] = None,
         message_id: Union[int, List[int]] = None,
         inline_message_id: Union[str, List[str]] = None,
-    ):
+    ) -> Optional[Union["pyrogram.types.Message", "pyrogram.types.CallbackQuery"]]:
         """Listen for a message, callback query, etc.
 
         Message:
