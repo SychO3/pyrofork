@@ -18,9 +18,8 @@
 #  along with Pyrofork.  If not, see <http://www.gnu.org/licenses/>.
 
 import pyrogram
-
+from typing import Union, Optional, List
 from pyrogram.filters import Filter
-from typing import List, Optional, Union
 
 class Ask:
     async def ask(
@@ -36,7 +35,7 @@ class Ask:
         inline_message_id: Union[str, List[str]] = None,
         *args,
         **kwargs,
-    ):
+    ) -> Optional[Union["pyrogram.types.Message", "pyrogram.types.CallbackQuery"]]:
         """Send a message then listen for a message, callback query, etc.
 
         Message:
@@ -68,10 +67,13 @@ class Ask:
                 The maximum amount of time to wait for a message.
 
             unallowed_click_alert (``bool``, *optional*):
-                Whether to alert the user if they click a button that doesn’t match the filters.
+                Whether to alert the user if they click a button that doesn't match the filters.
                 Default to True.
 
-            inline_message_id (``str``, *optional*):
+            message_id (``int`` | Iterable of ``int``, *optional*):
+                The message ID to listen for. If provided, the listener will only respond to messages with these IDs.
+
+            inline_message_id (``str`` | Iterable of ``str``, *optional*):
                 The inline message ID to listen for.
 
         Returns:
@@ -97,7 +99,7 @@ class Ask:
             message_id=message_id,
             inline_message_id=inline_message_id,
         )
-        if response:
-            response.sent_message = sent_message
 
+        if response and isinstance(response, pyrogram.types.Message):
+            response.sent_message = sent_message
         return response

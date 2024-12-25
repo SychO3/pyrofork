@@ -121,3 +121,8 @@ html_css_files = [
     "css/custom.css",
     "css/all.min.css",
 ]
+
+language = 'zh_CN'
+
+locale_dirs = ['locale/']
+gettext_compact = False

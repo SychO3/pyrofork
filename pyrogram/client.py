@@ -953,7 +953,7 @@ class Client(Methods):
                                                     )
 
                                                     count += 1
-                                        except Exception as e:
+                                        except Exception:
                                             pass
             else:
                 for path, handlers in include:
@@ -1042,7 +1042,7 @@ class Client(Methods):
                                                             )
 
                                                             count += 1
-                                                except Exception as e:
+                                                except Exception:
                                                     pass
 
                     if handlers is None:

@@ -440,6 +440,8 @@ class Message(Object, Update):
 
     # TODO: Add game missing field, Also connected_website
 
+    sent_message: Optional["Message"] = None
+
     def __init__(
         self,
         *,
@@ -5139,12 +5141,12 @@ class Message(Object, Update):
 
         Use as a shortcut for:
 
-        .. code-block:: python
+            .. code-block:: python
 
-            client.retract_vote(
-                chat_id=message.chat.id,
-                message_id=message_id,
-            )
+                client.retract_vote(
+                    chat_id=message.chat.id,
+                    message_id=message_id,
+                )
 
         Example:
             .. code-block:: python
@@ -5359,7 +5361,7 @@ class Message(Object, Update):
         """Bound method *ask* of :obj:`~pyrogram.types.Message`.
         
         Use as a shortcut for:
-
+        
         .. code-block:: python
 
             client.send_message(chat_id, "What is your name?")
