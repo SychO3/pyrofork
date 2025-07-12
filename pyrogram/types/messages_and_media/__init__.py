@@ -27,6 +27,7 @@ from .contact import Contact
 from .contact_registered import ContactRegistered
 from .dice import Dice
 from .document import Document
+from .external_reply_info import ExternalReplyInfo
 from .game import Game
 from .giveaway import Giveaway
 from .giveaway_launched import GiveawayLaunched
@@ -37,6 +38,12 @@ from .media_area_channel_post import MediaAreaChannelPost
 from .media_area_coordinates import MediaAreaCoordinates
 from .message import Message
 from .message_entity import MessageEntity
+from .message_origin import MessageOrigin
+from .message_origin_channel import MessageOriginChannel
+from .message_origin_chat import MessageOriginChat
+from .message_origin_hidden_user import MessageOriginHiddenUser
+from .message_origin_import import MessageOriginImport
+from .message_origin_user import MessageOriginUser
 from .photo import Photo
 from .poll import Poll
 from .poll_option import PollOption
@@ -48,6 +55,11 @@ from .stickerset import StickerSet
 from .stories_privacy_rules import StoriesPrivacyRules
 from .stripped_thumbnail import StrippedThumbnail
 from .thumbnail import Thumbnail
+from .todo_list import TodoList
+from .todo_task import TodoTask
+from .todo_tasks_added import TodoTasksAdded
+from .todo_tasks_completed import TodoTasksCompleted
+from .todo_tasks_incompleted import TodoTasksIncompleted
 from .venue import Venue
 from .video import Video
 from .video_note import VideoNote
@@ -71,6 +83,7 @@ from .wallpaper import Wallpaper
 from .wallpaper_settings import WallpaperSettings
 from .transcribed_audio import TranscribedAudio
 from .translated_text import TranslatedText
+from .text_quote import TextQuote
 
 __all__ = [
     "AlternativeVideo",
@@ -82,6 +95,7 @@ __all__ = [
     "Contact",
     "ContactRegistered",
     "Document",
+    "ExternalReplyInfo",
     "Game",
     "Giveaway",
     "GiveawayLaunched",
@@ -92,6 +106,12 @@ __all__ = [
     "MediaAreaCoordinates",
     "Message",
     "MessageEntity",
+    "MessageOrigin",
+    "MessageOriginChannel",
+    "MessageOriginChat",
+    "MessageOriginHiddenUser",
+    "MessageOriginImport",
+    "MessageOriginUser",
     "Photo",
     "Thumbnail",
     "StrippedThumbnail",
@@ -126,5 +146,11 @@ __all__ = [
     "Wallpaper",
     "WallpaperSettings",
     "TranscribedAudio",
-    "TranslatedText"
+    "TranslatedText",
+    "TextQuote",
+    "TodoList",
+    "TodoTask",
+    "TodoTasksAdded",
+    "TodoTasksCompleted",
+    "TodoTasksIncompleted"
 ]

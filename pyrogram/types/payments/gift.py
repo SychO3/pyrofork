@@ -18,7 +18,7 @@
 #  along with Pyrofork.  If not, see <http://www.gnu.org/licenses/>.
 
 from datetime import datetime
-from typing import List, Optional, Union
+from typing import List, Optional, Union, Dict
 
 import pyrogram
 from pyrogram import raw, types, utils
@@ -77,13 +77,16 @@ class Gift(Object):
             User who sent the star gift.
 
         owner (:obj:`~pyrogram.types.Chat`, *optional*):
-            Current gift owner.
+            Only available if the nfts is in telegram.
 
         owner_name (``str``, *optional*):
             Name of the user who received the star gift.
 
         owner_address (``str``, *optional*):
-            Address of the gift owner in TON blockchain.
+            Only available if the nfts is in ton network.
+
+        ton_address (``str``, *optional*):
+            Only available if the nfts is in ton network.
 
         price (``int``, *optional*):
             Price of this gift in stars.
@@ -99,6 +102,10 @@ class Gift(Object):
 
         available_amount (``int``, *optional*):
             The number of gifts available for purchase.
+            Returned only if is_limited is True.
+
+        resale_amount (``int``, *optional*):
+            The number of gifts available for resale.
             Returned only if is_limited is True.
 
         total_amount (``int``, *optional*):
@@ -141,7 +148,7 @@ class Gift(Object):
 
         raw (:obj:`~pyrogram.raw.base.StarGift`, *optional*):
             The raw object as received from the server.
-            
+
         link (``str``, *property*):
             A link to the gift.
             For unique gifts only.
@@ -163,6 +170,7 @@ class Gift(Object):
         owner: Optional["types.Chat"] = None,
         owner_name: Optional[str] = None,
         owner_address: Optional[str] = None,
+        ton_address: Optional[str] = None,
         price: Optional[int] = None,
         convert_price: Optional[int] = None,
         upgrade_price: Optional[int] = None,
@@ -173,6 +181,7 @@ class Gift(Object):
         collectible_id: Optional[int] = None,
         attributes: Optional[List["types.GiftAttribute"]] = None,
         available_amount: Optional[int] = None,
+        resale_amount: Optional[int] = None,
         total_amount: Optional[int] = None,
         can_upgrade: Optional[bool] = None,
         can_export_at: Optional[datetime] = None,
@@ -201,6 +210,7 @@ class Gift(Object):
         self.owner = owner
         self.owner_name = owner_name
         self.owner_address = owner_address
+        self.ton_address = ton_address
         self.price = price
         self.convert_price = convert_price
         self.upgrade_price = upgrade_price
@@ -211,6 +221,7 @@ class Gift(Object):
         self.collectible_id = collectible_id
         self.attributes = attributes
         self.available_amount = available_amount
+        self.resale_amount = resale_amount
         self.total_amount = total_amount
         self.can_upgrade = can_upgrade
         self.can_export_at = can_export_at
@@ -226,14 +237,14 @@ class Gift(Object):
         self.raw = raw
 
     @staticmethod
-    async def _parse(client, gift, users={}, chats={}):
+    async def _parse(client, gift, users=None, chats=None):
         if isinstance(gift, raw.types.StarGift):
             return await Gift._parse_regular(client, gift)
         elif isinstance(gift, raw.types.StarGiftUnique):
             return await Gift._parse_unique(client, gift, users, chats)
         elif isinstance(gift, raw.types.StarGiftSaved):
             return await Gift._parse_saved(client, gift, users, chats)
-    
+
     @staticmethod
     async def _parse_regular(
         client,
@@ -249,6 +260,7 @@ class Gift(Object):
             convert_price=star_gift.convert_stars,
             upgrade_price=getattr(star_gift, "upgrade_stars", None),
             available_amount=getattr(star_gift, "availability_remains", None),
+            resale_amount=getattr(star_gift, "availability_resale", None),
             total_amount=getattr(star_gift, "availability_total", None),
             is_limited=getattr(star_gift, "limited", None),
             is_sold_out=getattr(star_gift, "sold_out", None),
@@ -263,8 +275,8 @@ class Gift(Object):
     async def _parse_unique(
         client,
         star_gift: "raw.types.StarGiftUnique",
-        users: dict = {},
-        chats: dict = {}
+        users: Dict[int, "raw.types.User"] = None,
+        chats: Dict[int, "raw.types.Chat"] = None
     ) -> "Gift":
         owner_id = utils.get_raw_peer_id(getattr(star_gift, "owner_id", None))
         return Gift(
@@ -273,13 +285,20 @@ class Gift(Object):
             title=star_gift.title,
             collectible_id=star_gift.num,
             attributes=types.List(
-                [await types.GiftAttribute._parse(client, attr, users, chats) for attr in star_gift.attributes]
+                [await types.GiftAttribute._parse(client, attr, users) for attr in star_gift.attributes]
             ) or None,
             available_amount=getattr(star_gift, "availability_issued", None),
+            resale_amount=getattr(star_gift, "availability_resale", None),
             total_amount=getattr(star_gift, "availability_total", None),
-            owner=types.Chat._parse_chat(client, users.get(owner_id) or chats.get(owner_id)),
+            owner=(
+                types.Chat._parse_chat(client, users.get(owner_id) or
+                chats.get(owner_id))
+                if owner_id is not None
+                else None
+            ),
             owner_name=getattr(star_gift, "owner_name", None),
             owner_address=getattr(star_gift, "owner_address", None),
+            ton_address=getattr(star_gift, "gift_address", None),
             is_upgraded=True,
             raw=star_gift,
             client=client
@@ -289,8 +308,8 @@ class Gift(Object):
     async def _parse_saved(
         client,
         saved_gift: "raw.types.SavedStarGift",
-        users: dict = {},
-        chats: dict = {}
+        users: Dict[int, "raw.types.User"] = None,
+        chats: Dict[int, "raw.types.Chat"] = None
     ) -> "Gift":
         caption, caption_entities = (
             utils.parse_text_with_entities(
@@ -324,8 +343,8 @@ class Gift(Object):
     async def _parse_action(
         client,
         message: "raw.base.Message",
-        users: dict = {},
-        chats: dict = {}
+        users: Dict[int, "raw.types.User"] = None,
+        chats: Dict[int, "raw.types.Chat"] = None
     ) -> "Gift":
         action = message.action  # type: raw.types.MessageActionStarGift
 

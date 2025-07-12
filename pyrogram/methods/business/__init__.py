@@ -1,5 +1,6 @@
 #  Pyrogram - Telegram MTProto API Client Library for Python
 #  Copyright (C) 2017-present Dan <https://github.com/delivrance>
+#  Copyright (C) 2022-present Mayuri-Chan <https://github.com/Mayuri-Chan>
 #
 #  This file is part of Pyrogram.
 #
@@ -18,12 +19,20 @@
 
 from .answer_pre_checkout_query import AnswerPreCheckoutQuery
 from .answer_shipping_query import AnswerShippingQuery
+from .delete_business_messages import DeleteBusinessMessages
 from .get_business_connection import GetBusinessConnection
+from .get_business_account_gifts import GetBusinessAccountGifts
+from .get_business_account_star_balance import GetBusinessAccountStarBalance
+from .transfer_business_account_stars import TransferBusinessAccountStars
 
 
 class TelegramBusiness(
     AnswerPreCheckoutQuery,
     AnswerShippingQuery,
+    DeleteBusinessMessages,
     GetBusinessConnection,
+    GetBusinessAccountGifts,
+    GetBusinessAccountStarBalance,
+    TransferBusinessAccountStars,
 ):
     pass

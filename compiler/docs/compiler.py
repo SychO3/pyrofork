@@ -146,6 +146,7 @@ def pyrogram_api():
             stop_transmission
             export_session_string
             set_parse_mode
+            ping
         """,
         conversation="""
         Conversation
@@ -164,6 +165,7 @@ def pyrogram_api():
         """,
         messages="""
         Messages
+            add_task_to_todo
             send_message
             forward_media_group
             forward_messages
@@ -173,6 +175,7 @@ def pyrogram_api():
             send_audio
             send_document
             send_sticker
+            send_todo
             send_video
             send_animation
             send_voice
@@ -184,6 +187,7 @@ def pyrogram_api():
             send_contact
             send_cached_media
             send_reaction
+            set_todo_tasks_completion
             edit_message_text
             edit_message_caption
             edit_message_media
@@ -223,6 +227,7 @@ def pyrogram_api():
             transcribe_audio
             translate_message_text
             start_bot
+            delete_chat_history
         """,
         chats="""
         Chats
@@ -253,6 +258,7 @@ def pyrogram_api():
             get_folders
             get_forum_topics
             get_forum_topics_by_id
+            get_forum_topics_count
             set_chat_username
             archive_chats
             unarchive_chats
@@ -279,6 +285,7 @@ def pyrogram_api():
             hide_general_topic
             reopen_forum_topic
             reopen_general_topic
+            transfer_chat_ownership
             unhide_general_topic
             update_color
             update_folder
@@ -362,15 +369,23 @@ def pyrogram_api():
             get_chat_gifts
             hide_gift
             refund_star_payment
+            search_gifts_for_resale
             send_invoice
             send_paid_media
             send_paid_reaction
             send_payment_form
             send_gift
+            send_resold_gift
+            set_gift_resale_price
+            set_pinned_gifts
             show_gift
             transfer_gift
             upgrade_gift
             get_stars_balance
+        """,
+        phone="""
+        Phone
+            get_call_members
         """,
         password="""
         Password
@@ -406,7 +421,11 @@ def pyrogram_api():
         Telegram Business
             answer_pre_checkout_query
             answer_shipping_query
+            delete_business_messages
             get_business_connection
+            get_business_account_gifts
+            get_business_account_star_balance
+            transfer_business_account_stars
         """,
         authorization="""
         Authorization
@@ -418,12 +437,11 @@ def pyrogram_api():
             resend_code
             sign_in
             sign_in_bot
-            sign_up
+            sign_in_qrcode
             get_password_hint
             check_password
             send_recovery_code
             recover_password
-            accept_terms_of_service
             log_out
             get_active_sessions
         """,
@@ -447,7 +465,7 @@ def pyrogram_api():
         fmt_keys = {}
 
         for k, v in categories.items():
-            name, *methods = get_title_list(v)
+            _, *methods = get_title_list(v)
             fmt_keys.update({k: "\n    ".join("{0} <{0}>".format(m) for m in methods)})
 
             for method in methods:
@@ -481,6 +499,7 @@ def pyrogram_api():
             BusinessWeeklyOpen
             BusinessWorkingHours
             User
+            Username
             Chat
             ChatPreview
             ChatPhoto
@@ -503,6 +522,7 @@ def pyrogram_api():
             PeerUser
             PeerChannel
             BotInfo
+            GroupCallMember
             ChatColor
             CollectibleItemInfo
             BotVerification
@@ -511,11 +531,23 @@ def pyrogram_api():
         Messages & Media
             Message
             MessageEntity
+            MessageOriginChannel
+            MessageOriginChat
+            MessageOriginHiddenUser
+            MessageOriginImport
+            MessageOriginUser
+            MessageOrigin
             Photo
             Thumbnail
+            TodoList
+            TodoTask
+            TodoTasksAdded
+            TodoTasksCompleted
+            TodoTasksIncompleted
             Audio
             AvailableEffect
             Document
+            ExternalReplyInfo
             AlternativeVideo
             Animation
             Video
@@ -538,6 +570,7 @@ def pyrogram_api():
             WebPagePreview
             TranscribedAudio
             TranslatedText
+            TextQuote
             Poll
             PollOption
             Dice
@@ -553,6 +586,7 @@ def pyrogram_api():
             ForumTopicCreated
             ForumTopicEdited
             ForumTopicClosed
+            ForumTopicDeleted
             ForumTopicReopened
             GeneralTopicHidden
             GeneralTopicUnhidden
@@ -592,6 +626,7 @@ def pyrogram_api():
             Invoice
             LabeledPrice
             PaidMedia
+            PaidMessagePriceChanged
             PaymentForm
             PaymentInfo
             PaymentRefunded
@@ -701,17 +736,20 @@ def pyrogram_api():
         InputMessageContent
             InputMessageContent
             InputReplyToMessage
+            InputReplyToMonoforum
             InputReplyToStory
             InputTextMessageContent
             InputLocationMessageContent
             InputVenueMessageContent
             InputContactMessageContent
             InputInvoiceMessageContent
+            InputTodoTask
         """,
         authorization="""
         Authorization
             ActiveSession
             ActiveSessions
+            LoginToken
             SentCode
             TermsOfService
         """
@@ -729,7 +767,7 @@ def pyrogram_api():
         fmt_keys = {}
 
         for k, v in categories.items():
-            name, *types = get_title_list(v)
+            _, *types = get_title_list(v)
 
             fmt_keys.update({k: "\n    ".join(types)})
 

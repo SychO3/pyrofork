@@ -1,5 +1,4 @@
 #  Pyrofork - Telegram MTProto API Client Library for Python
-#  Copyright (C) 2017-present Dan <https://github.com/delivrance>
 #  Copyright (C) 2022-present Mayuri-Chan <https://github.com/Mayuri-Chan>
 #
 #  This file is part of Pyrofork.
@@ -17,29 +16,22 @@
 #  You should have received a copy of the GNU Lesser General Public License
 #  along with Pyrofork.  If not, see <http://www.gnu.org/licenses/>.
 
-import pyrogram
-from pyrogram import raw
+from ..object import Object
 
 
-class AcceptTermsOfService:
-    async def accept_terms_of_service(
-        self: "pyrogram.Client",
-        terms_of_service_id: str
-    ) -> bool:
-        """Accept the given terms of service.
+class InputTodoTask(Object):
+    """Contains information about a todo task.
 
-        .. include:: /_includes/usable-by/users.rst
+    Parameters:
+        title (``str``):
+            Title of the task.
 
-        Parameters:
-            terms_of_service_id (``str``):
-                The terms of service identifier.
-        """
-        r = await self.invoke(
-            raw.functions.help.AcceptTermsOfService(
-                id=raw.types.DataJSON(
-                    data=terms_of_service_id
-                )
-            )
-        )
+        entities (List of :obj:`~pyrogram.types.MessageEntity`):
+            Entities in the title of the task.
+    """
 
-        return bool(r)
+    def __init__(self, *, title: str, entities: list = None):
+        super().__init__()
+
+        self.title = title
+        self.entities = entities

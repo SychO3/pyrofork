@@ -43,6 +43,7 @@ from .chat_reactions import ChatReactions
 from .dialog import Dialog
 from .emoji_status import EmojiStatus
 from .folder import Folder
+from .group_call_member import GroupCallMember
 from .invite_link_importer import InviteLinkImporter
 from .restriction import Restriction
 from .user import User
@@ -50,6 +51,7 @@ from .username import Username
 from .forum_topic import ForumTopic
 from .forum_topic_created import ForumTopicCreated
 from .forum_topic_closed import ForumTopicClosed
+from .forum_topic_deleted import ForumTopicDeleted
 from .forum_topic_reopened import ForumTopicReopened
 from .forum_topic_edited import ForumTopicEdited
 from .general_forum_topic_hidden import GeneralTopicHidden
@@ -88,6 +90,7 @@ __all__ = [
     "ForumTopic",
     "ForumTopicCreated",
     "ForumTopicClosed",
+    "ForumTopicDeleted",
     "ForumTopicReopened",
     "ForumTopicEdited",
     "GeneralTopicHidden",
@@ -104,5 +107,6 @@ __all__ = [
     "ChatPrivileges",
     "ChatJoiner",
     "EmojiStatus",
+    "GroupCallMember",
     "ChatReactions"
 ]

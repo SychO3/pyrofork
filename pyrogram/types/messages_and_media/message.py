@@ -20,12 +20,10 @@
 import logging
 from datetime import datetime
 from functools import partial
-from typing import List, Match, Union, BinaryIO, Optional, Callable
+from typing import List, Match, Union, BinaryIO, Optional, Callable, Dict
 
 import pyrogram
-from pyrogram import raw, enums
-from pyrogram import types
-from pyrogram import utils
+from pyrogram import enums, raw, types, utils
 from pyrogram.errors import ChannelPrivate, MessageIdsEmpty, PeerIdInvalid
 from pyrogram.parser import utils as parser_utils, Parser
 from ..object import Object
@@ -90,23 +88,8 @@ class Message(Object, Update):
             Topic the message belongs to.
             only returned using when client.get_messages.
 
-        forward_from (:obj:`~pyrogram.types.User`, *optional*):
-            For forwarded messages, sender of the original message.
-
-        forward_sender_name (``str``, *optional*):
-            For messages forwarded from users who have hidden their accounts, name of the user.
-
-        forward_from_chat (:obj:`~pyrogram.types.Chat`, *optional*):
-            For messages forwarded from channels, information about the original channel. For messages forwarded from anonymous group administrators, information about the original supergroup.
-
-        forward_from_message_id (``int``, *optional*):
-            For messages forwarded from channels, identifier of the original message in the channel.
-
-        forward_signature (``str``, *optional*):
-            For messages forwarded from channels, signature of the post author if present.
-
-        forward_date (:py:obj:`~datetime.datetime`, *optional*):
-            For forwarded messages, date the original message was sent.
+        forward_origin (:obj:`~pyrogram.types.MessageOrigin`, *optional*):
+            Information about the original message for forwarded messages.
 
         is_topic_message (``bool``, *optional*):
             True, if the message is sent to a forum topic
@@ -189,11 +172,8 @@ class Message(Object, Update):
             For messages with a caption, special entities like usernames, URLs, bot commands, etc. that appear
             in the caption.
 
-        quote_text (``str``, *optional*):
-            Quoted reply text.
-
-        quote_entities (List of :obj:`~pyrogram.types.MessageEntity`, *optional*):
-            For quote text, special entities like usernames, URLs, bot commands, etc. that appear in the quote text.
+        quote (:obj:`~pyrogram.types.TextQuote`, *optional*):
+            Chosen quote from the replied message.
 
         effect_id (``str``, *optional*):
             Unique identifier of the message effect added to the message.
@@ -213,6 +193,9 @@ class Message(Object, Update):
 
         paid_media (:obj:`~pyrogram.types.PaidMedia`, *optional*):
             Message is a paid media, information about the paid media.
+
+        todo (:obj:`~pyrogram.types.Todo`, *optional*):
+            Message is a todo list, information about the todo list.
 
         sticker (:obj:`~pyrogram.types.Sticker`, *optional*):
             Message is a sticker, information about the sticker.
@@ -338,6 +321,9 @@ class Message(Object, Update):
             Messages sent from yourself to other chats are outgoing (*outgoing* is True).
             An exception is made for your own personal chat; messages sent there will be incoming.
 
+        external_reply (:obj:`~pyrogram.types.ExternalReplyInfo`, *optional*):
+            Information about the message that is being replied to, which may come from another chat or forum topic.
+
         matches (List of regex Matches, *optional*):
             A list containing all `Match Objects <https://docs.python.org/3/library/re.html#match-objects>`_ that match
             the text of this message. Only applicable when using :obj:`Filters.regex <pyrogram.Filters.regex>`.
@@ -421,8 +407,26 @@ class Message(Object, Update):
         gifted_premium (:obj:`~pyrogram.types.GiftedPremium`, *optional*):
             Info about a gifted Telegram Premium subscription
 
+        screenshot_taken (:obj:`~pyrogram.types.ScreenshotTaken`, *optional*):
+            Service message: screenshot taken.
+
+        paid_message_price_changed (:obj:`~pyrogram.types.PaidMessagePriceChanged`, *optional*):
+            Service message: paid message price changed.
+
+        todo_tasks_added (:obj:`~pyrogram.types.TodoTasksAdded`, *optional*):
+            Service message: todo tasks added.
+
+        todo_tasks_completed (:obj:`~pyrogram.types.TodoTasksCompleted`, *optional*):
+            Service message: todo tasks completed.
+
+        todo_tasks_incompleted (:obj:`~pyrogram.types.TodoTasksIncompleted`, *optional*):
+            Service message: todo tasks incompleted.
+
         link (``str``, *property*):
             Generate a link to this message, only for groups and channels.
+
+        content (``str``, *property*):
+            The text or caption content of the message.
 
         scheduled (``bool``, *optional*):
             Message is a scheduled message and still in schedule.
@@ -452,12 +456,7 @@ class Message(Object, Update):
         date: datetime = None,
         chat: "types.Chat" = None,
         topic: "types.ForumTopic" = None,
-        forward_from: "types.User" = None,
-        forward_sender_name: str = None,
-        forward_from_chat: "types.Chat" = None,
-        forward_from_message_id: int = None,
-        forward_signature: str = None,
-        forward_date: datetime = None,
+        forward_origin: "types.MessageOrigin" = None,
         is_topic_message: bool = None,
         reply_to_chat_id: int = None,
         reply_to_message_id: int = None,
@@ -482,14 +481,14 @@ class Message(Object, Update):
         text: Str = None,
         entities: List["types.MessageEntity"] = None,
         caption_entities: List["types.MessageEntity"] = None,
-        quote_text: str = None,
-        quote_entities: List["types.MessageEntity"] = None,
+        quote: "types.TextQuote" = None,
         effect_id: str = None,
         invert_media: bool = None,
         audio: "types.Audio" = None,
         document: "types.Document" = None,
         photo: "types.Photo" = None,
         paid_media: "types.PaidMedia" = None,
+        todo: "types.Todo" = None,
         sticker: "types.Sticker" = None,
         animation: "types.Animation" = None,
         game: "types.Game" = None,
@@ -502,6 +501,10 @@ class Message(Object, Update):
         gift_code: "types.GiftCode" = None,
         gift: "types.Gift" = None,
         screenshot_taken: "types.ScreenshotTaken" = None,
+        paid_message_price_changed: "types.PaidMessagePriceChanged" = None,
+        todo_tasks_added: "types.TodoTasksAdded" = None,
+        todo_tasks_completed: "types.TodoTasksCompleted" = None,
+        todo_tasks_incompleted: "types.TodoTasksIncompleted" = None,
         invoice: "types.Invoice" = None,
         story: Union["types.MessageStory", "types.Story"] = None,
         alternative_videos: List["types.AlternativeVideo"] = None,
@@ -532,6 +535,7 @@ class Message(Object, Update):
         forwards: int = None,
         via_bot: "types.User" = None,
         outgoing: bool = None,
+        external_reply: Optional["types.ExternalReplyInfo"] = None,
         matches: List[Match] = None,
         command: List[str] = None,
         bot_allowed: "types.BotAllowed" = None,
@@ -571,13 +575,8 @@ class Message(Object, Update):
         self.sender_business_bot = sender_business_bot
         self.date = date
         self.chat = chat
-        self.topic = topic
-        self.forward_from = forward_from
-        self.forward_sender_name = forward_sender_name
-        self.forward_from_chat = forward_from_chat
-        self.forward_from_message_id = forward_from_message_id
-        self.forward_signature = forward_signature
-        self.forward_date = forward_date
+        self.forward_origin = forward_origin
+        self.external_reply = external_reply
         self.is_topic_message = is_topic_message
         self.reply_to_chat_id = reply_to_chat_id
         self.reply_to_message_id = reply_to_message_id
@@ -602,14 +601,14 @@ class Message(Object, Update):
         self.text = text
         self.entities = entities
         self.caption_entities = caption_entities
-        self.quote_text = quote_text
-        self.quote_entities = quote_entities
+        self.quote = quote
         self.effect_id = effect_id
         self.invert_media = invert_media
         self.audio = audio
         self.document = document
         self.photo = photo
         self.paid_media = paid_media
+        self.todo = todo
         self.sticker = sticker
         self.animation = animation
         self.game = game
@@ -623,6 +622,10 @@ class Message(Object, Update):
         self.gift_code = gift_code
         self.gift = gift
         self.screenshot_taken = screenshot_taken
+        self.paid_message_price_changed = paid_message_price_changed
+        self.todo_tasks_added = todo_tasks_added
+        self.todo_tasks_completed = todo_tasks_completed
+        self.todo_tasks_incompleted = todo_tasks_incompleted
         self.invoice = invoice
         self.story = story
         self.video = video
@@ -717,9 +720,9 @@ class Message(Object, Update):
     async def _parse(
         client: "pyrogram.Client",
         message: raw.base.Message,
-        users: dict,
-        chats: dict,
-        topics: dict = None,
+        users: Dict[int, "raw.types.User"],
+        chats: Dict[int, "raw.types.Chat"],
+        topics: Dict[int, "raw.types.ForumTopic"] = None,
         is_scheduled: bool = False,
         business_connection_id: str = None,
         replies: int = 1
@@ -787,6 +790,10 @@ class Message(Object, Update):
             gift_code = None
             gift = None
             screenshot_taken = None
+            paid_message_price_changed = None
+            todo_tasks_added = None
+            todo_tasks_completed = None
+            todo_tasks_incompleted = None
 
             service_type = None
             chat_join_type = None
@@ -835,7 +842,7 @@ class Message(Object, Update):
                 service_type = enums.MessageServiceType.BOT_ALLOWED
             elif isinstance(action, raw.types.MessageActionRequestedPeer) or isinstance(action, raw.types.MessageActionRequestedPeerSentMe):
                 chats_shared = await types.RequestedChats._parse(client, action)
-                service_type = enums.MessageServiceType.ChatShared
+                service_type = enums.MessageServiceType.CHAT_SHARED
             elif isinstance(action, raw.types.MessageActionTopicCreate):
                 forum_topic_created = types.ForumTopicCreated._parse(message)
                 service_type = enums.MessageServiceType.FORUM_TOPIC_CREATED
@@ -879,7 +886,7 @@ class Message(Object, Update):
                 giveaway_launched = types.GiveawayLaunched._parse(client, action)
                 service_type = enums.MessageServiceType.GIVEAWAY_LAUNCHED
             elif isinstance(action, raw.types.MessageActionGiveawayResults):
-                giveaway_result = await types.GiveawayResult._parse(client, action, True)
+                giveaway_result = await types.GiveawayResult._parse(client, action, True, users, chats)
                 service_type = enums.MessageServiceType.GIVEAWAY_RESULT
             elif isinstance(action, raw.types.MessageActionBoostApply):
                 boosts_applied = action.boosts
@@ -908,6 +915,10 @@ class Message(Object, Update):
             elif isinstance(action, raw.types.MessageActionScreenshotTaken):
                 screenshot_taken = types.ScreenshotTaken()
                 service_type = enums.MessageServiceType.SCREENSHOT_TAKEN
+            elif isinstance(action, raw.types.MessageActionPaidMessagesPrice):
+                paid_message_price_changed = types.PaidMessagePriceChanged._parse(action)
+                service_type = enums.MessageServiceType.PAID_MESSAGE_PRICE_CHANGED
+
 
             parsed_message = Message(
                 id=message.id,
@@ -953,6 +964,7 @@ class Message(Object, Update):
                 contact_registered=contact_registered,
                 gift_code=gift_code,
                 screenshot_taken=screenshot_taken,
+                paid_message_price_changed=paid_message_price_changed,
                 raw=message,
                 chat_join_type=chat_join_type,
                 client=client
@@ -987,6 +999,34 @@ class Message(Object, Update):
                         parsed_message.service = enums.MessageServiceType.GAME_HIGH_SCORE
                     except MessageIdsEmpty:
                         pass
+            if isinstance(action, raw.types.MessageActionTodoCompletions):
+                if action.completed:
+                    parsed_message.todo_tasks_completed = types.TodoTasksCompleted._parse(action)
+                if action.incompleted:
+                    parsed_message.todo_tasks_incompleted = types.TodoTasksIncompleted._parse(action)
+                parsed_message.service_type = enums.MessageServiceType.TODO_TASKS_COMPLETION
+                try:
+                    parsed_message.reply_to_message = await client.get_messages(
+                        parsed_message.chat.id,
+                        reply_to_message_ids=message.id,
+                        replies=0
+                    )
+                except MessageIdsEmpty:
+                    pass
+                parsed_message.reply_to_message_id = message.reply_to.reply_to_msg_id
+
+            if isinstance(action, raw.types.MessageActionTodoAppendTasks):
+                parsed_message.todo_tasks_added = types.TodoTasksAdded._parse(client, action)
+                parsed_message.service = enums.MessageServiceType.TODO_TASKS_ADDED
+                try:
+                    parsed_message.reply_to_message = await client.get_messages(
+                        parsed_message.chat.id,
+                        reply_to_message_ids=message.id,
+                        replies=0
+                    )
+                except MessageIdsEmpty:
+                    pass
+                parsed_message.reply_to_message_id = message.reply_to.reply_to_msg_id
 
             client.message_cache[(parsed_message.chat.id, parsed_message.id)] = parsed_message
 
@@ -997,7 +1037,7 @@ class Message(Object, Update):
                     else:
                         parsed_message.message_thread_id = message.reply_to.reply_to_msg_id
                     parsed_message.is_topic_message = True
-            elif parsed_message.chat.is_forum and parsed_message.message_thread_id is None:
+            elif parsed_message.chat.type == enums.ChatType.FORUM and parsed_message.message_thread_id is None:
                 parsed_message.message_thread_id = 1
                 parsed_message.is_topic_message = True
 
@@ -1009,34 +1049,22 @@ class Message(Object, Update):
             entities = types.List(filter(lambda x: x is not None, entities))
 
             sender_business_bot = None
-            forward_from = None
-            forward_sender_name = None
-            forward_from_chat = None
-            forward_from_message_id = None
-            forward_signature = None
-            forward_date = None
             is_topic_message = None
 
             forward_header = message.fwd_from  # type: raw.types.MessageFwdHeader
+            forward_origin = None
 
             if forward_header:
-                forward_date = utils.timestamp_to_datetime(forward_header.date)
-
-                if forward_header.from_id:
-                    raw_peer_id = utils.get_raw_peer_id(forward_header.from_id)
-                    peer_id = utils.get_peer_id(forward_header.from_id)
-
-                    if peer_id > 0:
-                        forward_from = types.User._parse(client, users[raw_peer_id])
-                    else:
-                        forward_from_chat = types.Chat._parse_channel_chat(client, chats[raw_peer_id])
-                        forward_from_message_id = forward_header.channel_post
-                        forward_signature = forward_header.post_author
-                elif forward_header.from_name:
-                    forward_sender_name = forward_header.from_name
+                forward_origin = types.MessageOrigin._parse(
+                client,
+                forward_header,
+                users,
+                chats,
+                )
 
             photo = None
             paid_media = None
+            todo = None
             location = None
             contact = None
             venue = None
@@ -1076,13 +1104,13 @@ class Message(Object, Update):
                     venue = types.Venue._parse(client, media)
                     media_type = enums.MessageMediaType.VENUE
                 elif isinstance(media, raw.types.MessageMediaGame):
-                    game = types.Game._parse(client, message)
+                    game = types.Game._parse(client, media)
                     media_type = enums.MessageMediaType.GAME
                 elif isinstance(media, raw.types.MessageMediaGiveaway):
-                    giveaway = await types.Giveaway._parse(client, message)
+                    giveaway = await types.Giveaway._parse(client, message, chats)
                     media_type = enums.MessageMediaType.GIVEAWAY
                 elif isinstance(media, raw.types.MessageMediaGiveawayResults):
-                    giveaway_result = await types.GiveawayResult._parse(client, message.media)
+                    giveaway_result = await types.GiveawayResult._parse(client, message.media, users=users, chats=chats)
                     media_type = enums.MessageMediaType.GIVEAWAY_RESULT
                 elif isinstance(media, raw.types.MessageMediaStory):
                     story = await types.MessageStory._parse(client, media)
@@ -1114,7 +1142,7 @@ class Message(Object, Update):
                                 video_note = types.VideoNote._parse(client, doc, video_attributes)
                                 media_type = enums.MessageMediaType.VIDEO_NOTE
                             else:
-                                video = types.Video._parse(client, doc, video_attributes, file_name, media.ttl_seconds)
+                                video = types.Video._parse(client, doc, video_attributes, file_name, media.ttl_seconds, media.video_cover, media.video_timestamp)
                                 media_type = enums.MessageMediaType.VIDEO
                                 has_media_spoiler = media.spoiler
 
@@ -1163,6 +1191,9 @@ class Message(Object, Update):
                 elif isinstance(media, raw.types.MessageMediaPaidMedia):
                     paid_media = types.PaidMedia._parse(client, media)
                     media_type = enums.MessageMediaType.PAID_MEDIA
+                elif isinstance(media, raw.types.MessageMediaToDo):
+                    todo = types.TodoList._parse(client, media, users)
+                    media_type = enums.MessageMediaType.TODO
                 else:
                     media = None
 
@@ -1183,7 +1214,7 @@ class Message(Object, Update):
             from_user = types.User._parse(client, users.get(user_id, None))
             sender_chat = types.Chat._parse(client, message, users, chats, is_chat=False) if not from_user else None
 
-            reactions = types.MessageReactions._parse(client, message.reactions, users)
+            reactions = types.MessageReactions._parse(client, message.reactions, users, chats)
 
             if message.via_business_bot_id:
                 sender_business_bot = types.User._parse(client, users.get(message.via_business_bot_id, None))
@@ -1220,12 +1251,7 @@ class Message(Object, Update):
                 author_signature=message.post_author,
                 has_protected_content=message.noforwards,
                 has_media_spoiler=has_media_spoiler,
-                forward_from=forward_from,
-                forward_sender_name=forward_sender_name,
-                forward_from_chat=forward_from_chat,
-                forward_from_message_id=forward_from_message_id,
-                forward_signature=forward_signature,
-                forward_date=forward_date,
+                forward_origin=forward_origin,
                 is_topic_message=is_topic_message,
                 mentioned=message.mentioned,
                 scheduled=is_scheduled,
@@ -1237,6 +1263,7 @@ class Message(Object, Update):
                 invert_media=message.invert_media,
                 photo=photo,
                 paid_media=paid_media,
+                todo=todo,
                 location=location,
                 contact=contact,
                 venue=venue,
@@ -1270,11 +1297,19 @@ class Message(Object, Update):
                 parsed_message.sender_chat = sender_chat
 
             if message.reply_to:
+                parsed_message.external_reply = await types.ExternalReplyInfo._parse(
+                    client,
+                    message.reply_to,
+                    users,
+                    chats
+                )
                 if isinstance(message.reply_to, raw.types.MessageReplyHeader):
-                    parsed_message.quote_text = message.reply_to.quote_text
-                    if len(message.reply_to.quote_entities) > 0:
-                        quote_entities = [types.MessageEntity._parse(client, entity, users) for entity in message.reply_to.quote_entities]
-                        parsed_message.quote_entities = types.List(filter(lambda x: x is not None, quote_entities))
+                    if message.reply_to.quote:
+                        parsed_message.quote = types.TextQuote._parse(
+                            client,
+                            users,
+                            message.reply_to
+                        )
                     if message.reply_to.forum_topic:
                         if message.reply_to.reply_to_top_id:
                             thread_id = message.reply_to.reply_to_top_id
@@ -1310,20 +1345,15 @@ class Message(Object, Update):
 
                 if replies:
                     if parsed_message.reply_to_message_id:
-                        if rtci is not None and parsed_message.chat.id != reply_to_chat_id:
-                            key = (reply_to_chat_id, message.reply_to.reply_to_msg_id)
-                            reply_to_params = {"chat_id": key[0], 'message_ids': key[1]}
-                        else:
-                            key = (parsed_message.chat.id, parsed_message.reply_to_message_id)
-                            reply_to_params = {'chat_id': key[0], 'reply_to_message_ids': message.id}
-
                         try:
+                            key = (parsed_message.chat.id, parsed_message.reply_to_message_id)
                             reply_to_message = client.message_cache[key]
 
                             if not reply_to_message:
                                 reply_to_message = await client.get_messages(
-                                    replies=replies - 1,
-                                    **reply_to_params
+                                    parsed_message.chat.id,
+                                    reply_to_message_ids=message.id,
+                                    replies=replies - 1
                                 )
                             if reply_to_message and not reply_to_message.forum_topic_created:
                                 parsed_message.reply_to_message = reply_to_message
@@ -1341,7 +1371,7 @@ class Message(Object, Update):
                             pass
                         else:
                             parsed_message.reply_to_story = reply_to_story
-            if parsed_message.chat.is_forum and parsed_message.message_thread_id is None:
+            if parsed_message.chat.type == enums.ChatType.FORUM and parsed_message.message_thread_id is None:
                 parsed_message.message_thread_id = 1
                 parsed_message.is_topic_message = True
 
@@ -1356,10 +1386,73 @@ class Message(Object, Update):
             self.chat.type in (enums.ChatType.GROUP, enums.ChatType.SUPERGROUP, enums.ChatType.CHANNEL)
             and self.chat.username
         ):
+            if self.chat.type == enums.ChatType.SUPERGROUP and self.message_thread_id:
+                return f"https://t.me/{self.chat.username}/{self.message_thread_id}/{self.id}"
             return f"https://t.me/{self.chat.username}/{self.id}"
-        else:
-            return f"https://t.me/c/{utils.get_channel_id(self.chat.id)}/{self.id}"
+        if self.chat.type == enums.ChatType.PRIVATE:
+            return f"tg://openmessage?user_id={self.from_user.id}&message_id={self.id}"
+        if self.message_thread_id:
+            return f"https://t.me/c/{utils.get_channel_id(self.chat.id)}/{self.message_thread_id}/{self.id}"
+        return f"https://t.me/c/{utils.get_channel_id(self.chat.id)}/{self.id}"
 
+    @property
+    def content(self) -> str:
+        return self.text or self.caption or Str("").init([])
+
+    # region Deprecated
+    # TODO: Remove later
+    @property
+    def forward_from(self) -> Optional["types.User"]:
+        log.warning(
+            "`message.forward_from` is deprecated and will be removed in future updates. Use `message.forward_origin.sender_user` instead."
+        )
+        return getattr(self.forward_origin, "sender_user", None)
+
+    @property
+    def forward_sender_name(self) -> Optional[str]:
+        log.warning(
+            "`message.forward_sender_name` property is deprecated and will be removed in future updates. Use `message.forward_origin.sender_user_name` instead."
+        )
+        return getattr(self.forward_origin, "sender_user_name", None)
+
+    @property
+    def forward_from_chat(self) -> Optional["types.Chat"]:
+        log.warning(
+            "`message.forward_from_chat` property is deprecated and will be removed in future updates. Use `message.forward_origin.chat.sender_chat` instead."
+        )
+        return getattr(
+            self.forward_origin,
+            "chat",
+            getattr(
+                self.forward_origin,
+                "sender_chat",
+                None
+            )
+        )
+
+    @property
+    def forward_from_message_id(self) -> Optional[int]:
+        log.warning(
+            "`message.forward_from_message_id` property is deprecated and will be removed in future updates. Use `message.forward_origin.message_id` instead."
+        )
+        return getattr(self.forward_origin, "message_id", None)
+
+    @property
+    def forward_signature(self) -> Optional[str]:
+        log.warning(
+            "`message.forward_signature` property is deprecated and will be removed in future updates. Use `message.forward_origin.author_signature` instead."
+        )
+        return getattr(self.forward_origin, "author_signature", None)
+
+    @property
+    def forward_date(self) -> Optional[datetime]:
+        log.warning(
+            "`message.forward_date` property is deprecated and will be removed in future updates. Use `message.forward_origin.date` instead."
+        )
+        return getattr(self.forward_origin, "date", None)
+
+    # endregion
+    
     async def get_media_group(self) -> List["types.Message"]:
         """Bound method *get_media_group* of :obj:`~pyrogram.types.Message`.
         
@@ -2763,7 +2856,9 @@ class Message(Object, Update):
         allow_paid_broadcast: bool = None,
         message_effect_id: int = None,
         parse_mode: Optional["enums.ParseMode"] = None,
-        invert_media: bool = None
+        invert_media: bool = None,
+        progress: Callable = None,
+        progress_args: tuple = (),
     ) -> List["types.Message"]:
         """Bound method *reply_media_group* of :obj:`~pyrogram.types.Message`.
 
@@ -2824,6 +2919,28 @@ class Message(Object, Update):
             invert_media (``bool``, *optional*):
                 Inverts the position of the media and caption.
 
+            progress (``Callable``, *optional*):
+                Pass a callback function to view the file transmission progress.
+                The function must take *(current, total)* as positional arguments (look at Other Parameters below for a
+                detailed description) and will be called back each time a new file chunk has been successfully
+                transmitted.
+
+            progress_args (``tuple``, *optional*):
+                Extra custom arguments for the progress callback function.
+                You can pass anything you need to be available in the progress callback scope; for example, a Message
+                object or a Client instance in order to edit the message with the updated progress status.
+
+        Other Parameters:
+            current (``int``):
+                The amount of bytes transmitted so far.
+
+            total (``int``):
+                The total size of the file.
+
+            *args (``tuple``, *optional*):
+                Extra custom arguments as defined in the ``progress_args`` parameter.
+                You can either keep ``*args`` or add every single extra argument in your function signature.
+
         Returns:
             On success, a :obj:`~pyrogram.types.Messages` object is returned containing all the
             single messages sent.
@@ -2862,7 +2979,9 @@ class Message(Object, Update):
             quote_entities=quote_entities,
             allow_paid_broadcast=allow_paid_broadcast,
             message_effect_id=message_effect_id,
-            invert_media=invert_media
+            invert_media=invert_media,
+            progress=progress,
+            progress_args=progress_args,
         )
 
     async def reply_photo(
@@ -2880,6 +2999,8 @@ class Message(Object, Update):
         reply_in_chat_id: Union[int, str] = None,
         quote_text: str = None,
         quote_entities: List["types.MessageEntity"] = None,
+        schedule_date: datetime = None,
+        protect_content: bool = None,
         allow_paid_broadcast: bool = None,
         message_effect_id: int = None,
         view_once: bool = None,
@@ -2969,6 +3090,12 @@ class Message(Object, Update):
                 List of special entities that appear in quote_text, which can be specified instead of *parse_mode*.
                 for reply_to_message only.
 
+            schedule_date (:py:obj:`~datetime.datetime`, *optional*):
+                Date when the message will be automatically sent.
+
+            protect_content (``bool``, *optional*):
+                Protects the contents of the sent message from forwarding and saving.
+
             allow_paid_broadcast (``bool``, *optional*):
                 Pass True to allow the message to ignore regular broadcast limits for a small fee; for bots
 
@@ -3043,6 +3170,8 @@ class Message(Object, Update):
             reply_to_chat_id=reply_to_chat_id,
             quote_text=quote_text,
             quote_entities=quote_entities,
+            schedule_date=schedule_date,
+            protect_content=protect_content,
             allow_paid_broadcast=allow_paid_broadcast,
             message_effect_id=message_effect_id,
             view_once=view_once,
@@ -3595,9 +3724,11 @@ class Message(Object, Update):
         quote_entities: List["types.MessageEntity"] = None,
         allow_paid_broadcast: bool = None,
         message_effect_id: int = None,
-        cover: Optional[Union[str, "io.BytesIO"]] = None,
+        view_once: bool = None,
+        cover: Union[str, BinaryIO] = None,
         start_timestamp: int = None,
         schedule_date: datetime = None,
+        protect_content: bool = None,
         invert_media: bool = None,
         reply_markup: Union[
             "types.InlineKeyboardMarkup",
@@ -3702,8 +3833,12 @@ class Message(Object, Update):
             allow_paid_broadcast (``bool``, *optional*):
                 Pass True to allow the message to ignore regular broadcast limits for a small fee; for bots.
 
-            cover (``str`` | :obj:`io.BytesIO`, *optional*):
-                Cover of the video; pass None to skip cover uploading.
+            cover (``str`` | ``BinaryIO``, *optional*):
+                Video cover.
+                Pass a file_id as string to attach a photo that exists on the Telegram servers,
+                pass a HTTP URL as a string for Telegram to get a video from the Internet,
+                pass a file path as string to upload a new photo civer that exists on your local machine, or
+                pass a binary file-like object with its attribute ".name" set for in-memory uploads.
             
             start_timestamp (``int``, *optional*):
                 Timestamp from which the video playing must start, in seconds.
@@ -3711,8 +3846,14 @@ class Message(Object, Update):
             schedule_date (:py:obj:`~datetime.datetime`, *optional*):
                 Date when the message will be automatically sent.
 
+            protect_content (``bool``, *optional*):
+                Protects the contents of the sent message from forwarding and saving.
+
             message_effect_id (``int`` ``64-bit``, *optional*):
                 Unique identifier of the message effect to be added to the message; for private chats only.
+
+            view_once (``bool``, *optional*):
+                Pass True to send the video as a view-once message.
 
             invert_media (``bool``, *optional*):
                 Pass True to invert the video and caption position.
@@ -3793,9 +3934,11 @@ class Message(Object, Update):
             quote_entities=quote_entities,
             allow_paid_broadcast=allow_paid_broadcast,
             message_effect_id=message_effect_id,
+            view_once=view_once,
             cover=cover,
             start_timestamp=start_timestamp,
             schedule_date=schedule_date,
+            protect_content=protect_content,
             invert_media=invert_media,
             reply_markup=reply_markup,
             progress=progress,

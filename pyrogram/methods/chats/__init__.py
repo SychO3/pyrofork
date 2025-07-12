@@ -50,6 +50,7 @@ from .get_dialogs_count import GetDialogsCount
 from .get_folders import GetFolders
 from .get_forum_topics import GetForumTopics
 from .get_forum_topics_by_id import GetForumTopicsByID
+from .get_forum_topics_count import GetForumTopicsCount
 from .get_send_as_chats import GetSendAsChats
 from .join_chat import JoinChat
 from .leave_chat import LeaveChat
@@ -66,6 +67,7 @@ from .set_chat_title import SetChatTitle
 from .set_chat_username import SetChatUsername
 from .set_send_as_chat import SetSendAsChat
 from .set_slow_mode import SetSlowMode
+from .transfer_chat_ownership import TransferChatOwnership
 from .unarchive_chats import UnarchiveChats
 from .unban_chat_member import UnbanChatMember
 from .unpin_all_chat_messages import UnpinAllChatMessages
@@ -98,6 +100,7 @@ class Chats(
     GetFolders,
     GetForumTopics,
     GetForumTopicsByID,
+    GetForumTopicsCount,
     ArchiveChats,
     UnarchiveChats,
     CreateGroup,
@@ -128,6 +131,7 @@ class Chats(
     GetSendAsChats,
     SetSendAsChat,
     SetChatProtectedContent,
+    TransferChatOwnership,
     UpdateColor,
     UpdateFolder
 ):
